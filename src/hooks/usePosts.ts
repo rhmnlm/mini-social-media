@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postApi, type PostPayload } from "../api/posts";
 
-export function usePosts(){
+export function usePosts(enabled = true){
     return useQuery({
         queryKey: ["posts"],
         queryFn: () => postApi.list(),
         staleTime: 2 * 60 * 1000,
+        enabled,
     })
 }
 
