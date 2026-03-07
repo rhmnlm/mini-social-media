@@ -4,66 +4,124 @@ import { CommentIcon, HeartIcon } from "./components/icons";
 import { usePost, usePosts } from "./hooks/usePosts";
 import { useComments } from "./hooks/useComments";
 import { timeAgo } from "./utility/dateUtil";
-import { Outlet, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { generateAvatarUrl } from "./utility/avatarUtil";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 const SIM_POST_ID = "00MM8J1IMQ53U26EW9YN8L12GJ";
 
-function PostDetailModal() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { data: post, isLoading: postLoading } = usePost(id ?? "");
-  const { data: commentsData, isLoading: commentsLoading } = useComments(id ?? "");
+function PostDetailContent({ id }: { id: string }) {
+  const { data: post, isLoading: postLoading } = usePost(id);
+  const { data: commentsData, isLoading: commentsLoading } = useComments(id);
 
   if (postLoading) return null;
   if (!post) return null;
 
   return (
-    <div
-      id="postModal"
-      className="modal"
-      onClick={() => navigate("/")}
-    >
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-body post-detail">
-          <div className="post-detail-content">
-            <img src={post.imageUrl} alt={post.imageUrl} />
+    <div className="modal-body post-detail">
+      <div className="post-detail-content">
+        <img src={post.imageUrl} alt={post.imageUrl} />
+      </div>
+      <div className="post-detail-metadata">
+        <div className="author-section">
+          <div className="profile">
+            <div className="profile-picture-wrapper">
+              <img
+                className="profile-picture"
+                src={generateAvatarUrl(post.author)}
+                alt={`profile picture of ${post.author}`}
+              />
+            </div>
+            <span className="author">{post.author}</span>
           </div>
-          <div className="post-detail-metadata">
-            <div className="author-section">
-              <div className="profile">
-                <div className="profile-picture-wrapper">
-                  <img
-                    className="profile-picture"
-                    src="src/assets/profile_picture.jpeg"
-                    alt="profile picture of rhmnlm"
-                  />
-                </div>
-                <span className="author">{post.author}</span>
-              </div>
-              <div className="likes">
-                <div className="icon">
-                  <HeartIcon stroke="black" />
-                </div>
-                <span className="likes-count">{post.likes}</span>
-              </div>
+          <div className="likes">
+            <div className="icon">
+              <HeartIcon stroke="black" />
             </div>
-            <div className="comment-section">
-              {commentsLoading ? (
-                <p className="comments-status">Loading comments...</p>
-              ) : !commentsData || commentsData.items.length === 0 ? (
-                <p className="comments-status">No comments yet.</p>
-              ) : (
-                commentsData.items.map((comment) => (
-                  <div key={comment.id} className="comment-item">
-                    <span className="author">{comment.author}</span>
-                    <span className="comment-text">{comment.text}</span>
-                    <span className="date-posted">{timeAgo(comment.createdAt)}</span>
-                  </div>
-                ))
-              )}
-            </div>
+            <span className="likes-count">{post.likes}</span>
           </div>
         </div>
+        <div className="comment-section">
+          <div className="post-caption" style={{margin: "8px 4px"}}>
+            <div className="profile">
+              <div className="profile-picture-wrapper">
+                <img
+                  className="profile-picture"
+                  src={generateAvatarUrl(post.author)}
+                  alt={`profile picture of ${post.author}`}
+                />
+              </div>
+            </div>
+            <div>
+              <span className="author">{post.author}</span>
+              <span>{post.caption}</span>
+            </div>
+          </div>
+          {commentsLoading ? (
+            <p className="comments-status">Loading comments...</p>
+          ) : !commentsData || commentsData.items.length === 0 ? (
+            <p className="comments-status">No comments yet.</p>
+          ) : (
+            commentsData.items.map((comment) => (
+              <div key={comment.id} className="comment-item" style={{margin: "8px 4px"}}>
+                <div className="profile">
+                  <div className="profile-picture-wrapper">
+                    <img
+                      className="profile-picture"
+                      src={generateAvatarUrl(comment.author)}
+                      alt={`profile picture of ${comment.author}`}
+                    />
+                  </div>
+                </div>
+                <div style={{textAlign: "left"}}>
+                  <div>
+                    <span className="author">{comment.author}</span>
+                    <span className="comment-text">{comment.text}</span>
+                  </div>
+                  <span className="date-posted">
+                    {timeAgo(comment.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PostDetailModal() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  return (
+    <div id="postModal" className="modal" onClick={() => navigate("/")}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <PostDetailContent id={id ?? ""} />
+      </div>
+    </div>
+  );
+}
+
+function PostDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  return (
+    <div className="post-detail-page">
+      <div className="post-detail-page-header">
+        <button className="back-button" onClick={() => navigate("/")}>
+          ← Back to feed
+        </button>
+      </div>
+      <div className="post-detail-page-body">
+        <PostDetailContent id={id ?? ""} />
       </div>
     </div>
   );
@@ -71,19 +129,24 @@ function PostDetailModal() {
 
 function FeedLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, fetchNextPage, hasNextPage } = usePosts(true);
   const { data: simPost } = usePost(SIM_POST_ID);
 
   const posts = data?.pages.flatMap((p) => p.items) ?? [];
-  const allPosts = simPost ? [simPost, ...posts.filter((p) => p.id !== SIM_POST_ID)] : posts;
+  const allPosts = simPost
+    ? [simPost, ...posts.filter((p) => p.id !== SIM_POST_ID)]
+    : posts;
 
   useEffect(() => {
     if (!sentinelRef.current || !hasNextPage) return;
     const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) fetchNextPage(); },
-      { threshold: 0.1 }
+      (entries) => {
+        if (entries[0].isIntersecting) fetchNextPage();
+      },
+      { threshold: 0.1 },
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
@@ -92,58 +155,63 @@ function FeedLayout() {
   if (isLoading) return <>fetching content...</>;
 
   return (
-    <>
-      <div className="content-layout">
-        {allPosts.length === 0 ? (
-          <p>No posts yet.</p>
-        ) : (
-          allPosts.map((post) => (
-            <div key={post.id} className="card">
-              <div className="metadata">
-                <div className="profile-picture-wrapper">
-                  <img
-                    className="profile-picture"
-                    src="src/assets/profile_picture.jpeg"
-                    alt="profile picture of rhmnlm"
-                  />
-                </div>
-                <span className="author">{post.author}</span>
-                <span className="date-posted">{timeAgo(post.createdAt)}</span>
+    <div className="content-layout">
+      {allPosts.length === 0 ? (
+        <p>No posts yet.</p>
+      ) : (
+        allPosts.map((post) => (
+          <div key={post.id} className="card">
+            <div className="metadata">
+              <div className="profile-picture-wrapper">
+                <img
+                  className="profile-picture"
+                  src={generateAvatarUrl(post.author)}
+                  alt={`profile picture of ${post.author}`}
+                />
               </div>
-              <div className="content">
-                <img src={post.imageUrl} alt={post.imageUrl} />
-              </div>
-              <div className="post-analytic">
-                <div className="likes">
-                  <div className="icon">
-                    <HeartIcon stroke="black" />
-                  </div>
-                  <span className="likes-count">{post.likes}</span>
+              <span className="author">{post.author}</span>
+              <span className="date-posted">{timeAgo(post.createdAt)}</span>
+            </div>
+            <div className="content">
+              <img src={post.imageUrl} alt={post.imageUrl} />
+            </div>
+            <div className="post-analytic">
+              <div className="likes">
+                <div className="icon">
+                  <HeartIcon stroke="black" />
                 </div>
-                <div className="comment" onClick={() => navigate(`/posts/${post.id}`)}>
-                  <div className="icon">
-                    <CommentIcon stroke="black" />
-                  </div>
-                </div>
+                <span className="likes-count">{post.likes}</span>
               </div>
-              <div className="captions">
-                <span className="author">{post.author}</span>
-                <span>{post.caption}</span>
+              <div
+                className="comment"
+                onClick={() =>
+                  navigate(`/posts/${post.id}`, {
+                    state: { backgroundLocation: location },
+                  })
+                }
+              >
+                <div className="icon">
+                  <CommentIcon stroke="black" />
+                </div>
               </div>
             </div>
-          ))
-        )}
-        <div ref={sentinelRef} style={{ height: 1 }} />
-      </div>
-      {/* Modal renders on top of the feed when on /posts/:id */}
-      <Outlet />
-    </>
+            <div className="captions">
+              <span className="author">{post.author}</span>
+              <span>{post.caption}</span>
+            </div>
+          </div>
+        ))
+      )}
+      <div ref={sentinelRef} style={{ height: 1 }} />
+    </div>
   );
 }
 
 function App() {
   const [apiKey, setApiKey] = useState(sessionStorage.getItem("api-key") ?? "");
   const [inputValue, setInputValue] = useState("");
+  const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation;
 
   function handleLogin() {
     if (!inputValue.trim()) return;
@@ -173,11 +241,19 @@ function App() {
         </div>
       )}
       {apiKey && (
-        <Routes>
-          <Route path="/" element={<FeedLayout />}>
-            <Route path="posts/:id" element={<PostDetailModal />} />
-          </Route>
-        </Routes>
+        <>
+          {/* Render feed at backgroundLocation, or the current route normally */}
+          <Routes location={backgroundLocation || location}>
+            <Route path="/" element={<FeedLayout />} />
+            <Route path="posts/:id" element={<PostDetailPage />} />
+          </Routes>
+          {/* When navigated from feed, render modal overlay on top */}
+          {backgroundLocation && (
+            <Routes>
+              <Route path="posts/:id" element={<PostDetailModal />} />
+            </Routes>
+          )}
+        </>
       )}
     </>
   );
