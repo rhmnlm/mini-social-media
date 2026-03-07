@@ -1,10 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postApi, type PostPayload } from "../api/posts";
 
 export function usePosts(enabled = true){
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: ["posts"],
-        queryFn: () => postApi.list(),
+        queryFn: ({ pageParam }) => postApi.list({ cursor: pageParam as string | undefined }),
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined,
         staleTime: 2 * 60 * 1000,
         enabled,
     })
