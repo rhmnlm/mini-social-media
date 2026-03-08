@@ -809,6 +809,25 @@
   margin: 0 auto;
 }
 
+.feed-bottom-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0 32px;
+}
+
+.feed-bottom-status .spinner {
+  width: 20px;
+  height: 20px;
+  border-color: rgba(0, 0, 0, 0.15);
+  border-top-color: #555;
+}
+
+.feed-end-text {
+  font-size: 13px;
+  color: #999;
+}
+
 .card {
   width: 100%;
   min-height: 300px;
@@ -962,6 +981,29 @@ body.modal {
 .comment-item {
   display: flex;
   align-items: flex-start;
+}
+
+.comments-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 16px;
+  color: #aaa;
+}
+
+.comments-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  margin: 0;
+}
+
+.comments-empty-sub {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
 }
 
 /* ─── Skeleton loading ─── */

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { CommentIcon, HeartIcon, UploadImageIcon } from "./components/icons";
 import { usePost, usePosts, useUploadPost } from "./hooks/usePosts";
+import { useQueryClient } from "@tanstack/react-query";
 import { useComments } from "./hooks/useComments";
 import { timeAgo } from "./utility/dateUtil";
 import { generateAvatarUrl } from "./utility/avatarUtil";
@@ -12,7 +13,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { IconMoodSmile, IconPhotoScan, IconPolaroidFilled } from "@tabler/icons-react";
+import { IconMoodSmile, IconPhotoScan, IconPolaroidFilled, IconMessageCircle } from "@tabler/icons-react";
 
 const SIM_POST_ID = "00MM8J1IMQ53U26EW9YN8L12GJ";
 
@@ -66,7 +67,10 @@ function PostDetailContent({ id }: { id: string }) {
           {commentsLoading ? (
             <p className="comments-status">Loading comments...</p>
           ) : !commentsData || commentsData.items.length === 0 ? (
-            <p className="comments-status">No comments yet.</p>
+            <div className="comments-empty-state">
+              <IconMessageCircle size={32} stroke={1.5} color="#ccc" />
+              <p className="comments-empty-title">No comments yet</p>
+            </div>
           ) : (
             commentsData.items.map((comment) => (
               <div
@@ -346,8 +350,17 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
 }
 
 function AppLogo() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  function handleLogoClick() {
+    navigate("/");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    queryClient.invalidateQueries({ queryKey: ["posts"] });
+  }
+
   return (
-    <div className="logo">
+    <div className="logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
       <img src="/logo.svg" alt="logo" width="28" height="28" />
       <span className="logo-text">a-poc</span>
     </div>
@@ -360,7 +373,7 @@ function FeedLayout() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [showMobileCreate, setShowMobileCreate] = useState(false);
 
-  const { data, isLoading, fetchNextPage, hasNextPage } = usePosts(true);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(true);
   const { data: simPost } = usePost(SIM_POST_ID);
 
   const posts = data?.pages.flatMap((p) => p.items) ?? [];
@@ -490,6 +503,16 @@ function FeedLayout() {
             ))
           )}
           <div ref={sentinelRef} style={{ height: 1 }} />
+          {isFetchingNextPage && (
+            <div className="feed-bottom-status">
+              <span className="spinner" />
+            </div>
+          )}
+          {!hasNextPage && !isLoading && allPosts.length > 0 && (
+            <div className="feed-bottom-status">
+              <span className="feed-end-text">That's all for now.</span>
+            </div>
+          )}
         </div>
       </main>
 
