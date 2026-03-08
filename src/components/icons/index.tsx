@@ -58,9 +58,9 @@ export function UploadImageIcon({
       height={size}
       fill={fill}
       stroke={fill === "none" ? stroke : "none"}
-      stroke-width={fill === "none" ? strokeWidth : 0}
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth={fill === "none" ? strokeWidth : 0}
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <rect x="2" y="6" width="16" height="15" rx="2" />
 
@@ -68,8 +68,8 @@ export function UploadImageIcon({
 
       <circle cx="6.5" cy="10" r="1.2" fill="white" stroke="none" />
 
-      <line x1="19" y1="1" x2="19" y2="9" stroke-width="2" />
-      <line x1="15" y1="5" x2="23" y2="5" stroke-width="2" />
+      <line x1="19" y1="1" x2="19" y2="9" strokeWidth="2" />
+      <line x1="15" y1="5" x2="23" y2="5" strokeWidth="2" />
     </svg>
   );
 }

@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://mini-instagram-api.mistcloud.workers.dev'
+const API_URL = import.meta.env.VITE_API_ENDPOINT || 'https://mini-instagram-api.mistcloud.workers.dev'
 
 export const apiClient = axios.create({
     baseURL: API_URL,
