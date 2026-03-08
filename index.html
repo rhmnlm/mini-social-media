@@ -5,9 +5,183 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>a-poc</title>
+    <style>
+      /* ── Reset ── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #fff; }
+
+      /* ── 3-column layout ── */
+      #pre-shell {
+        display: grid;
+        grid-template-columns: 320px 1fr 320px;
+        grid-template-areas: "sidebar feed create";
+        min-height: 100vh;
+        width: 100%;
+      }
+      #pre-sidebar {
+        grid-area: sidebar;
+        position: sticky; top: 0;
+        height: 100vh;
+        padding: 24px 24px 0;
+        border-right: 1px solid #efefef;
+        display: flex; flex-direction: column;
+      }
+      #pre-logo {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 18px; font-weight: 700; color: #000;
+        padding: 6px 4px;
+      }
+      #pre-logo img { width: 28px; height: 28px; }
+      #pre-feed {
+        grid-area: feed;
+        display: flex; flex-direction: column; align-items: center;
+        padding: 20px 0 40px;
+        border-right: 1px solid #efefef;
+        min-height: 100vh;
+      }
+      #pre-right { grid-area: create; }
+
+      /* ── Card shell ── */
+      .pre-content-layout {
+        display: flex; flex-direction: column;
+        width: 100%; max-width: 600px; margin: 0 auto;
+      }
+      .pre-card { width: 100%; margin: 40px 0; }
+
+      /* ── Skeleton pieces ── */
+      @keyframes shimmer {
+        0%   { background-position: -600px 0; }
+        100% { background-position:  600px 0; }
+      }
+      .sk {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 600px 100%;
+        animation: shimmer 1.4s infinite linear;
+        border-radius: 6px;
+      }
+      .sk-avatar {
+        width: 32px; height: 32px; border-radius: 50%;
+        flex-shrink: 0; margin: 12px 8px;
+      }
+      .sk-text-sm  { height: 12px; border-radius: 4px; }
+      .sk-text-md  { height: 12px; border-radius: 4px; }
+      .sk-image    { width: 100%; aspect-ratio: 4/3; border-radius: 8px; }
+      .sk-icon     { width: 28px; height: 28px; border-radius: 6px; }
+
+      /* ── Row helpers ── */
+      .pre-meta    { display: flex; align-items: center; }
+      .pre-meta-lines { display: flex; flex-direction: column; gap: 6px; }
+      .pre-actions { display: flex; gap: 8px; margin: 12px 8px 4px; }
+      .pre-caption { display: flex; flex-direction: column; gap: 6px; padding: 4px 12px 8px; }
+
+      /* ── Mobile: hide sidebar/right, show header ── */
+      #pre-mobile-header { display: none; }
+      @media (max-width: 1100px) {
+        #pre-shell { grid-template-columns: 320px 1fr; grid-template-areas: "sidebar feed"; }
+        #pre-right { display: none; }
+        #pre-feed  { border-right: none; }
+      }
+      @media (max-width: 768px) {
+        #pre-shell    { display: flex; flex-direction: column; }
+        #pre-sidebar  { display: none; }
+        #pre-right    { display: none; }
+        #pre-mobile-header {
+          display: flex; align-items: center;
+          position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+          height: 52px; background: white;
+          border-bottom: 1px solid #efefef; padding: 0 16px;
+          gap: 10px; font-size: 18px; font-weight: 700; color: #000;
+        }
+        #pre-mobile-header img { width: 28px; height: 28px; }
+        #pre-feed { padding-top: 72px; padding-bottom: 80px; width: 100%; border-right: none; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static skeleton rendered before any JS loads -->
+      <div id="pre-shell">
+        <aside id="pre-sidebar">
+          <div id="pre-logo">
+            <img src="/logo.svg" alt="logo" />
+            <span>a-poc</span>
+          </div>
+        </aside>
+
+        <header id="pre-mobile-header">
+          <img src="/logo.svg" alt="logo" />
+          <span>a-poc</span>
+        </header>
+
+        <main id="pre-feed">
+          <div class="pre-content-layout">
+
+            <!-- Card 1 -->
+            <div class="pre-card">
+              <div class="pre-meta">
+                <div class="sk sk-avatar"></div>
+                <div class="pre-meta-lines">
+                  <div class="sk sk-text-sm" style="width:100px"></div>
+                  <div class="sk sk-text-md" style="width:60px"></div>
+                </div>
+              </div>
+              <div class="sk sk-image"></div>
+              <div class="pre-actions">
+                <div class="sk sk-icon"></div>
+                <div class="sk sk-icon"></div>
+              </div>
+              <div class="pre-caption">
+                <div class="sk sk-text-sm" style="width:80px"></div>
+                <div class="sk sk-text-md" style="width:55%"></div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="pre-card">
+              <div class="pre-meta">
+                <div class="sk sk-avatar"></div>
+                <div class="pre-meta-lines">
+                  <div class="sk sk-text-sm" style="width:120px"></div>
+                  <div class="sk sk-text-md" style="width:50px"></div>
+                </div>
+              </div>
+              <div class="sk sk-image"></div>
+              <div class="pre-actions">
+                <div class="sk sk-icon"></div>
+                <div class="sk sk-icon"></div>
+              </div>
+              <div class="pre-caption">
+                <div class="sk sk-text-sm" style="width:90px"></div>
+                <div class="sk sk-text-md" style="width:65%"></div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="pre-card">
+              <div class="pre-meta">
+                <div class="sk sk-avatar"></div>
+                <div class="pre-meta-lines">
+                  <div class="sk sk-text-sm" style="width:80px"></div>
+                  <div class="sk sk-text-md" style="width:55px"></div>
+                </div>
+              </div>
+              <div class="sk sk-image"></div>
+              <div class="pre-actions">
+                <div class="sk sk-icon"></div>
+                <div class="sk sk-icon"></div>
+              </div>
+              <div class="pre-caption">
+                <div class="sk sk-text-sm" style="width:70px"></div>
+                <div class="sk sk-text-md" style="width:45%"></div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+
+        <aside id="pre-right"></aside>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

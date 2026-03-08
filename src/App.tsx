@@ -380,7 +380,46 @@ function FeedLayout() {
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
 
-  if (isLoading) return <>fetching content...</>;
+  if (isLoading) return (
+    <div className="app-layout">
+      <aside className="sidebar">
+        <AppLogo />
+        <button className="create-post-button" disabled>
+          <span style={{ marginRight: "4px" }}>What's happening?</span>
+          <UploadImageIcon stroke="white" />
+        </button>
+      </aside>
+      <header className="mobile-header">
+        <AppLogo />
+      </header>
+      <main className="feed-column">
+        <div className="content-layout">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="card skeleton-card">
+              <div className="metadata">
+                <div className="skeleton skeleton-avatar" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div className="skeleton skeleton-text" style={{ width: 100 }} />
+                  <div className="skeleton skeleton-text" style={{ width: 60 }} />
+                </div>
+              </div>
+              <div className="skeleton skeleton-image" />
+              <div className="post-analytic" style={{ gap: 8 }}>
+                <div className="skeleton skeleton-icon" />
+                <div className="skeleton skeleton-icon" />
+              </div>
+              <div className="captions" style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 8 }}>
+                <div className="skeleton skeleton-text" style={{ width: 80 }} />
+                <div className="skeleton skeleton-text" style={{ width: "60%" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+      <aside className="right-panel" />
+      <footer className="mobile-footer" />
+    </div>
+  );
 
   return (
     <div className="app-layout">
