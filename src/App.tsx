@@ -92,7 +92,9 @@ function PostDetailContent({ id }: { id: string }) {
             </div>
           </div>
           {commentsLoading ? (
-            <p className="comments-status">Loading comments...</p>
+            <div className="comments-loading">
+              <span className="spinner comments-spinner" />
+            </div>
           ) : !commentsData || commentsData.items.length === 0 ? (
             <div className="comments-empty-state">
               <IconMessageCircle size={32} stroke={1.5} color="#ccc" />
