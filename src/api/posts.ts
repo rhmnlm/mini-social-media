@@ -10,6 +10,7 @@ export interface PostPayload {
     author: string;
     caption: string;
     image: File;
+    onUploadProgress?: (percent: number) => void;
 }
 
 export const postApi = {
@@ -28,6 +29,12 @@ export const postApi = {
 
         const response = await apiClient.post("api/posts", formData, {
             headers: { "Content-Type": undefined },
+            onUploadProgress: payload.onUploadProgress
+                ? (e) => {
+                      const percent = Math.round((e.loaded * 100) / (e.total ?? e.loaded));
+                      payload.onUploadProgress!(percent);
+                  }
+                : undefined,
         });
         return response.data;
     },

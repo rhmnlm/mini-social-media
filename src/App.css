@@ -410,6 +410,33 @@
   cursor: not-allowed;
 }
 
+.upload-progress-wrapper {
+  margin: 0 14px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upload-progress-track {
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.15s ease;
+}
+
+.upload-progress-label {
+  font-size: 11px;
+  color: #888;
+  text-align: right;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

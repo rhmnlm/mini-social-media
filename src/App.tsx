@@ -55,7 +55,7 @@ function PostDetailContent({ id }: { id: string }) {
   return (
     <div className="modal-body post-detail">
       <div className="post-detail-content">
-        <img src={post.imageUrl} alt={post.imageUrl} />
+        <img src={post.imageUrl} alt={post.imageUrl} loading="lazy" />
       </div>
       <div className="post-detail-metadata">
         <div className="author-section">
@@ -213,6 +213,7 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
   const [caption, setCaption] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [showEmoji, setShowEmoji] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
@@ -264,6 +265,7 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
     setCaption("");
     setError("");
     setShowEmoji(false);
+    setUploadProgress(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -289,15 +291,31 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
 
   function handlePost() {
     if (!file || !caption.trim()) return;
+    setUploadProgress(0);
     uploadPost(
-      { author: username, caption: caption.trim(), image: file },
+      {
+        author: username,
+        caption: caption.trim(),
+        image: file,
+        onUploadProgress: setUploadProgress,
+      },
       {
         onSuccess: () => {
           handleRemove();
           onClose?.();
         },
-        onError: () => {
-          setError("Failed to post. Please try again.");
+        onError: (error) => {
+          setUploadProgress(null);
+          const status =
+            error && typeof error === "object" && "response" in error
+              ? (error as { response?: { status?: number } }).response?.status
+              : undefined;
+          if (status === 413) setError("Image is too large for the server. Try a smaller file.");
+          else if (status === 415) setError("This image format isn't supported by the server.");
+          else if (status === 401) setError("Session expired. Please refresh and log in again.");
+          else if (status && status >= 500) setError("Server error. Please try again later.");
+          else if (!status) setError("Network error. Check your connection and try again.");
+          else setError("Failed to post. Please try again.");
         },
       }
     );
@@ -367,6 +385,16 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
               <span className="caption-char-count">{caption.length} / 2200</span>
             </div>
             {error && <p className="upload-error">{error}</p>}
+            {isPending && uploadProgress !== null && (
+              <div className="upload-progress-wrapper">
+                <div className="upload-progress-track">
+                  <div className="upload-progress-fill" style={{ width: `${uploadProgress}%` }} />
+                </div>
+                <span className="upload-progress-label">
+                  {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : "Processing…"}
+                </span>
+              </div>
+            )}
             <button
               className="post-submit-btn"
               disabled={!caption.trim() || isPending}
@@ -506,7 +534,7 @@ function FeedLayout() {
                   <span className="date-posted">{timeAgo(post.createdAt)}</span>
                 </div>
                 <div className="content">
-                  <img src={post.imageUrl} alt={post.imageUrl} />
+                  <img src={post.imageUrl} alt={post.imageUrl} loading="lazy" />
                 </div>
                 <div className="post-analytic">
                   <div className="likes">
