@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { CommentIcon, HeartIcon, UploadImageIcon } from "./components/icons";
-import { usePost, usePosts } from "./hooks/usePosts";
+import { usePost, usePosts, useUploadPost } from "./hooks/usePosts";
 import { useComments } from "./hooks/useComments";
 import { timeAgo } from "./utility/dateUtil";
 import { generateAvatarUrl } from "./utility/avatarUtil";
@@ -12,7 +12,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { IconPhotoScan, IconPolaroidFilled } from "@tabler/icons-react";
+import { IconMoodSmile, IconPhotoScan, IconPolaroidFilled } from "@tabler/icons-react";
 
 const SIM_POST_ID = "00MM8J1IMQ53U26EW9YN8L12GJ";
 
@@ -132,9 +132,55 @@ function PostDetailPage() {
   );
 }
 
+const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 1_000_000;
+
+const EMOJI_CATEGORIES = [
+  { label: "😀", emojis: ["😀","😂","🥰","😍","🤣","😊","😇","🙂","😉","😅","😆","🤩","🥳","😎","😴","🤗","🤔","😬","😤","😭","😱","🫡","😏","🥺","🤭"] },
+  { label: "🌸", emojis: ["🌸","🌺","🌻","🌹","🌷","🍀","☘️","🌿","🌱","🌲","🌙","☀️","🌈","⭐","❄️","🔥","🌊","🌴","🦋","🐶","🐱","🐻","🦊","🐼","🐨"] },
+  { label: "🍕", emojis: ["🍕","🍔","🍟","🌮","🍜","🍣","🎂","🍰","🧁","🍩","🍪","☕","🍵","🍷","🥤","🍎","🍓","🫐","🍉","🍇"] },
+  { label: "⚽", emojis: ["⚽","🏀","🎮","🎵","🎨","📷","🏆","🎯","🏋️","🎭","🎬","🎸","🎤","✈️","🚀","🌍","🏖️","🏔️"] },
+  { label: "❤️", emojis: ["❤️","💙","💚","💛","🧡","💜","🖤","🤍","💔","❣️","💕","💗","💓","💖","💘","💝","🩷","🩵","✨","🔥","💯","🙌","👏","🫶","💪"] },
+];
+
+function EmojiPickerPopover({ onSelect }: { onSelect: (emoji: string) => void }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div className="emoji-popover">
+      <div className="emoji-tabs">
+        {EMOJI_CATEGORIES.map((cat, i) => (
+          <button
+            key={i}
+            className={`emoji-tab${i === activeTab ? " active" : ""}`}
+            onClick={() => setActiveTab(i)}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+      <div className="emoji-grid">
+        {EMOJI_CATEGORIES[activeTab].emojis.map((emoji) => (
+          <button key={emoji} className="emoji-item" onClick={() => onSelect(emoji)}>
+            {emoji}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CreatePostPanel({ onClose }: { onClose?: () => void }) {
-  const [fileName, setFileName] = useState<string>("");
+  const username = sessionStorage.getItem("username") ?? "";
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [caption, setCaption] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const { mutate: uploadPost, isPending } = useUploadPost();
 
   useEffect(() => {
     return () => {
@@ -142,12 +188,83 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    if (!showEmoji) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setShowEmoji(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showEmoji]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    if (!ACCEPTED_MIME_TYPES.includes(selected.type)) {
+      setError("Only png, jpg, jpeg, and webp images are accepted.");
+      e.target.value = "";
+      return;
+    }
+
+    if (selected.size > MAX_FILE_SIZE) {
+      setError("File is too large. We can only process images up to 1 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setError("");
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setFileName(file.name);
-    setPreviewUrl(URL.createObjectURL(file));
+    setFile(selected);
+    setPreviewUrl(URL.createObjectURL(selected));
+  }
+
+  function handleRemove() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl("");
+    setFile(null);
+    setCaption("");
+    setError("");
+    setShowEmoji(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function insertEmoji(emoji: string) {
+    const textarea = textareaRef.current;
+    setShowEmoji(false);
+    if (!textarea) {
+      setCaption((prev) => prev + emoji);
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const next = caption.slice(0, start) + emoji + caption.slice(end);
+    if (next.length <= 2200) {
+      setCaption(next);
+      requestAnimationFrame(() => {
+        textarea.selectionStart = start + emoji.length;
+        textarea.selectionEnd = start + emoji.length;
+        textarea.focus();
+      });
+    }
+  }
+
+  function handlePost() {
+    if (!file || !caption.trim()) return;
+    uploadPost(
+      { author: username, caption: caption.trim(), image: file },
+      {
+        onSuccess: () => {
+          handleRemove();
+          onClose?.();
+        },
+        onError: () => {
+          setError("Failed to post. Please try again.");
+        },
+      }
+    );
   }
 
   return (
@@ -155,46 +272,75 @@ function CreatePostPanel({ onClose }: { onClose?: () => void }) {
       <div className="create-panel-header">
         <h3 className="create-panel-title">Share What's Happening</h3>
       </div>
-      <div className="create-post-form">
-        {previewUrl && (
-          <div className="create-post-preview">
-            <img
-              src={previewUrl}
-              alt="preview"
-              className="create-post-preview-img"
-            />
+      {!previewUrl ? (
+        <div className="upload-empty-state">
+          <div className="upload-icons-wrapper">
+            <IconPolaroidFilled className="svg-2" size={64} stroke={2} color="#E63946" />
+            <IconPhotoScan className="svg-1" size={64} color="#E63946" />
           </div>
-        )}
-          <div className="upload-icon-container">
-            <IconPolaroidFilled className="svg-2" size={64} stroke={2} color="#E63946"/>
-            <IconPhotoScan className="svg-1" size={64} color="#E63946"/>
-          </div>
-          <div className="input-wrapper">
-            <label
-              htmlFor="post-image-upload"
-              className={`create-post-file-label${fileName ? " has-file" : ""}`}
-            >
-              {fileName || "Choose image from your device"}
-            </label>
-            <input id="post-image-upload" className="create-post-file-input" type="file" accept="image/jpg, image/jpeg, image/png, image/webp"/>
-          </div>
-        {/* <div className="create-post-file-wrapper">
-          <label
-            htmlFor="post-image-upload"
-            className={`create-post-file-label${fileName ? " has-file" : ""}`}
-          >
-            {fileName || "Choose image..."}
+          <label htmlFor="post-image-upload" className="select-file-btn">
+            Select from your device
           </label>
           <input
+            ref={fileInputRef}
             id="post-image-upload"
             type="file"
-            accept="image/*"
-            className="create-post-file-input"
+            accept="image/jpg,image/jpeg,image/png,image/webp"
+            className="create-post-file-input-hidden"
             onChange={handleFileChange}
           />
-        </div> */}
-        {/* <button className="create-post-button">Share</button> */}
-      </div>
+          {error && <p className="upload-error">{error}</p>}
+        </div>
+      ) : (
+        <div className="create-post-with-preview">
+          <div className="preview-col">
+            <img src={previewUrl} alt="preview" className="create-post-preview-img" />
+            <button className="remove-preview-btn" onClick={handleRemove} aria-label="Remove image">
+              ✕
+            </button>
+          </div>
+          <div className="caption-col">
+            <div className="caption-author-row">
+              <img
+                className="caption-avatar"
+                src={generateAvatarUrl(username)}
+                alt={username}
+              />
+              <span className="caption-username">{username}</span>
+            </div>
+            <textarea
+              ref={textareaRef}
+              className="create-post-textarea"
+              placeholder="Write a caption..."
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              maxLength={2200}
+            />
+            <div className="caption-toolbar">
+              <div className="emoji-wrapper" ref={emojiRef}>
+                <button
+                  className="emoji-trigger-btn"
+                  onClick={() => setShowEmoji((v) => !v)}
+                  aria-label="Add emoji"
+                  title="Add emoji"
+                >
+                  <IconMoodSmile size={20} stroke={1.5} />
+                </button>
+                {showEmoji && <EmojiPickerPopover onSelect={insertEmoji} />}
+              </div>
+              <span className="caption-char-count">{caption.length} / 2200</span>
+            </div>
+            {error && <p className="upload-error">{error}</p>}
+            <button
+              className="post-submit-btn"
+              disabled={!caption.trim() || isPending}
+              onClick={handlePost}
+            >
+              {isPending ? <span className="spinner" /> : "Post"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -340,14 +486,18 @@ function FeedLayout() {
 
 function App() {
   const [apiKey, setApiKey] = useState(sessionStorage.getItem("api-key") ?? "");
-  const [inputValue, setInputValue] = useState("");
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState("");
   const location = useLocation();
   const backgroundLocation = location.state?.backgroundLocation;
 
+  const canLogin = apiKeyInput.trim().length > 0 && usernameInput.trim().length >= 2;
+
   function handleLogin() {
-    if (!inputValue.trim()) return;
-    sessionStorage.setItem("api-key", inputValue);
-    setApiKey(inputValue);
+    if (!canLogin) return;
+    sessionStorage.setItem("api-key", apiKeyInput.trim());
+    sessionStorage.setItem("username", usernameInput.trim());
+    setApiKey(apiKeyInput.trim());
   }
 
   return (
@@ -355,18 +505,34 @@ function App() {
       {!apiKey && (
         <div id="myModal" className="modal">
           <div className="modal-content">
-            <div className="modal-body">
-              <p>Welcome! Insert your API Key to get started.</p>
-              <input
-                id="api-key"
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              />
-              <div>
-                <button onClick={handleLogin}>Login</button>
+            <div className="modal-body login-modal-body">
+              <p className="login-title">Welcome to a-poc</p>
+              <p className="login-subtitle">Enter your details to get started.</p>
+              <div className="login-field">
+                <label htmlFor="login-username">Username</label>
+                <input
+                  id="login-username"
+                  type="text"
+                  placeholder="e.g. alice"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                />
               </div>
+              <div className="login-field">
+                <label htmlFor="login-api-key">API Key</label>
+                <input
+                  id="login-api-key"
+                  type="text"
+                  placeholder="Your API key"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                />
+              </div>
+              <button className="login-btn" onClick={handleLogin} disabled={!canLogin}>
+                Get started
+              </button>
             </div>
           </div>
         </div>

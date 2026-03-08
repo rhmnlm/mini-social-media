@@ -25,8 +25,10 @@ export const postApi = {
         formData.append("author", payload.author);
         formData.append("caption", payload.caption);
         formData.append("image", payload.image);
-        
-        const response = await apiClient.post("api/posts", formData);
+
+        const response = await apiClient.post("api/posts", formData, {
+            headers: { "Content-Type": undefined },
+        });
         return response.data;
     },
 
