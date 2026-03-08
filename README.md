@@ -1,73 +1,37 @@
-# React + TypeScript + Vite
+# a-poc
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A minimal Instagram-like social feed built with React + TypeScript.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Browse an infinite-scroll photo feed
+- View post details and comments in a modal overlay (URL-preserving)
+- Upload photos with a caption
+- Deterministic avatar generation per username (no backend dependency)
 
-## React Compiler
+## How to run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## .env setup
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+No `.env` file is needed. The API key is entered at runtime via the login screen and stored in `sessionStorage`.
+
+## Key technical decisions
+
+| Decision | Rationale |
+|---|---|
+| Modal-as-overlay routing via `backgroundLocation` state | Keeps the URL correct while rendering the post detail as a modal on top of the feed — deep-linkable and back-button safe |
+| `useInfiniteQuery` for feed | Cursor-based pagination with automatic cache merging; `staleTime: 2min` to reduce redundant fetches |
+| Axios interceptor for API key injection | Single place to wire auth; avoids repeating headers across every API call |
+| Deterministic SVG avatars from username hash | No avatar upload flow needed; consistent identity across sessions |
+| MIME-type validation (not extension) on file input | Extension can be spoofed; `file.type` reflects the browser's actual sniffing |
+
+## Known tradeoffs
+
+- **`App.tsx` is monolithic** — Login, feed, modal, create panel, emoji picker, and routing all live in one file. This was a deliberate time-constraint tradeoff. Ideal split: `LoginModal`, `FeedLayout`, `CreatePostPanel`, `PostDetailModal`, `EmojiPickerPopover`.

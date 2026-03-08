@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { IconMoodSmile, IconPhotoScan, IconPolaroidFilled, IconMessageCircle } from "@tabler/icons-react";
 
+// Pinned demo post — guaranteed to have comments for detail view demonstration
 const SIM_POST_ID = "00MM8J1IMQ53U26EW9YN8L12GJ";
 
 function CaptionText({ text }: { text: string }) {
@@ -55,7 +56,7 @@ function PostDetailContent({ id }: { id: string }) {
   return (
     <div className="modal-body post-detail">
       <div className="post-detail-content">
-        <img src={post.imageUrl} alt={post.imageUrl} loading="lazy" />
+        <img src={post.imageUrl} alt={`Post by ${post.author}`} loading="lazy" />
       </div>
       <div className="post-detail-metadata">
         <div className="author-section">
@@ -433,7 +434,7 @@ function FeedLayout() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [showMobileCreate, setShowMobileCreate] = useState(false);
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(true);
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(true);
   useEscKey(() => setShowMobileCreate(false), showMobileCreate);
   const { data: simPost } = usePost(SIM_POST_ID);
 
@@ -453,6 +454,17 @@ function FeedLayout() {
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
+
+  if (isError) return (
+    <div className="app-layout">
+      <aside className="sidebar"><AppLogo /></aside>
+      <main className="feed-column">
+        <div className="content-layout feed-error">
+          <p>Something went wrong. Check your API key and try again.</p>
+        </div>
+      </main>
+    </div>
+  );
 
   if (isLoading) return (
     <div className="app-layout">
@@ -534,7 +546,7 @@ function FeedLayout() {
                   <span className="date-posted">{timeAgo(post.createdAt)}</span>
                 </div>
                 <div className="content">
-                  <img src={post.imageUrl} alt={post.imageUrl} loading="lazy" />
+                  <img src={post.imageUrl} alt={`Post by ${post.author}`} loading="lazy" />
                 </div>
                 <div className="post-analytic">
                   <div className="likes">
