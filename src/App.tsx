@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { CommentIcon, HeartIcon, UploadImageIcon } from "./components/icons";
 import { usePost, usePosts, useUploadPost } from "./hooks/usePosts";
+import { useEscKey } from "./hooks/useEscKey";
 import { useQueryClient } from "@tanstack/react-query";
 import { useComments } from "./hooks/useComments";
 import { timeAgo } from "./utility/dateUtil";
@@ -84,7 +85,7 @@ function PostDetailContent({ id }: { id: string }) {
                 alt={`profile picture of ${post.author}`}
               />
             </div>
-            <div style={{ textAlign: "left" }}>
+            <div>
               <span className="author">{post.author}</span>
               <CaptionText text={post.caption} />
               <span className="date-posted">{timeAgo(post.createdAt)}</span>
@@ -107,7 +108,7 @@ function PostDetailContent({ id }: { id: string }) {
                     alt={`profile picture of ${comment.author}`}
                   />
                 </div>
-                <div style={{ textAlign: "left" }}>
+                <div>
                   <div>
                     <span className="author">{comment.author}</span>
                     <span className="comment-text">{comment.text}</span>
@@ -128,10 +129,19 @@ function PostDetailContent({ id }: { id: string }) {
 function PostDetailModal() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const close = () => navigate("/");
+
+  useEscKey(close);
 
   return (
-    <div id="postModal" className="modal" onClick={() => navigate("/")}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div id="postModal" className="modal" onClick={close}>
+      <div
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Post detail"
+        onClick={(e) => e.stopPropagation()}
+      >
         <PostDetailContent id={id ?? ""} />
       </div>
     </div>
@@ -380,7 +390,7 @@ function AppLogo() {
   }
 
   return (
-    <div className="logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
+    <div className="logo" onClick={handleLogoClick}>
       <img src="/logo.svg" alt="logo" width="28" height="28" />
       <span className="logo-text">a-poc</span>
     </div>
@@ -394,6 +404,7 @@ function FeedLayout() {
   const [showMobileCreate, setShowMobileCreate] = useState(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(true);
+  useEscKey(() => setShowMobileCreate(false), showMobileCreate);
   const { data: simPost } = usePost(SIM_POST_ID);
 
   const posts = data?.pages.flatMap((p) => p.items) ?? [];
@@ -418,7 +429,7 @@ function FeedLayout() {
       <aside className="sidebar">
         <AppLogo />
         <button className="create-post-button" disabled>
-          <span style={{ marginRight: "4px" }}>What's happening?</span>
+          <span>What's happening?</span>
           <UploadImageIcon stroke="white" />
         </button>
       </aside>
@@ -431,17 +442,17 @@ function FeedLayout() {
             <div key={i} className="card skeleton-card">
               <div className="metadata">
                 <div className="skeleton skeleton-avatar" />
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div className="skeleton-meta">
                   <div className="skeleton skeleton-text" style={{ width: 100 }} />
                   <div className="skeleton skeleton-text" style={{ width: 60 }} />
                 </div>
               </div>
               <div className="skeleton skeleton-image" />
-              <div className="post-analytic" style={{ gap: 8 }}>
+              <div className="post-analytic">
                 <div className="skeleton skeleton-icon" />
                 <div className="skeleton skeleton-icon" />
               </div>
-              <div className="captions" style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 8 }}>
+              <div className="captions">
                 <div className="skeleton skeleton-text" style={{ width: 80 }} />
                 <div className="skeleton skeleton-text" style={{ width: "60%" }} />
               </div>
@@ -463,7 +474,7 @@ function FeedLayout() {
           className="create-post-button"
           onClick={() => setShowMobileCreate(true)}
         >
-          <span style={{ marginRight: "4px" }}>What's happening?</span>
+          <span>What's happening?</span>
           <UploadImageIcon stroke="white" />
         </button>
       </aside>
@@ -502,8 +513,9 @@ function FeedLayout() {
                     </div>
                     <span className="likes-count">{post.likes}</span>
                   </div>
-                  <div
+                  <button
                     className="comment"
+                    aria-label="View comments"
                     onClick={() =>
                       navigate(`/posts/${post.id}`, {
                         state: { backgroundLocation: location },
@@ -513,7 +525,7 @@ function FeedLayout() {
                     <div className="icon">
                       <CommentIcon stroke="black" />
                     </div>
-                  </div>
+                  </button>
                 </div>
                 <div className="captions">
                   <span className="author">{post.author}</span>
@@ -554,6 +566,9 @@ function FeedLayout() {
         <div className="modal" onClick={() => setShowMobileCreate(false)}>
           <div
             className="modal-content create-post-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create post"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-body">
@@ -586,9 +601,9 @@ function App() {
     <>
       {!apiKey && (
         <div id="myModal" className="modal">
-          <div className="modal-content">
+          <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="login-title">
             <div className="modal-body login-modal-body">
-              <p className="login-title">Welcome to a-poc</p>
+              <p id="login-title" className="login-title">Welcome to a-poc</p>
               <p className="login-subtitle">Enter your details to get started.</p>
               <div className="login-field">
                 <label htmlFor="login-username">Username</label>
