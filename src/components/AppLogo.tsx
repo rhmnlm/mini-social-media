@@ -12,7 +12,8 @@ export default function AppLogo() {
   }
 
   return (
-    <div className="logo" onClick={handleLogoClick}>
+    <div className="logo" role="button" tabIndex={0} onClick={handleLogoClick}
+      onKeyDown={(e) => e.key === "Enter" && handleLogoClick()}>
       <img src="/logo.svg" alt="logo" width="28" height="28" />
       <span className="logo-text">a-poc</span>
     </div>

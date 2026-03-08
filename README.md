@@ -34,4 +34,4 @@ No `.env` file is needed. The API key is entered at runtime via the login screen
 
 ## Known tradeoffs
 
-- **`App.tsx` is monolithic** — Login, feed, modal, create panel, emoji picker, and routing all live in one file. This was a deliberate time-constraint tradeoff. Ideal split: `LoginModal`, `FeedLayout`, `CreatePostPanel`, `PostDetailModal`, `EmojiPickerPopover`.
+- **No dedicated pages folder** — `PostDetailPage` and `FeedLayout` live under `components/` rather than a `pages/` directory. Acceptable for this scope.

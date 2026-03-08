@@ -10,8 +10,8 @@ export default function PostDetailContent({ id }: { id: string }) {
   const { data: post, isLoading: postLoading } = usePost(id);
   const { data: commentsData, isLoading: commentsLoading } = useComments(id);
 
-  if (postLoading) return null;
-  if (!post) return null;
+  if (postLoading) return <div className="post-detail-loading"><span className="spinner" /></div>;
+  if (!post) return <div className="post-detail-error"><p>Post not found.</p></div>;
 
   return (
     <div className="modal-body post-detail">
