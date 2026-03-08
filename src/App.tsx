@@ -17,6 +17,33 @@ import { IconMoodSmile, IconPhotoScan, IconPolaroidFilled, IconMessageCircle } f
 
 const SIM_POST_ID = "00MM8J1IMQ53U26EW9YN8L12GJ";
 
+function CaptionText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) setClamped(el.scrollHeight > el.clientHeight);
+  }, [text]);
+
+  return (
+    <span className="caption-text-wrapper">
+      <span
+        ref={ref}
+        className={`caption-text${expanded ? "" : " caption-text-clamped"}`}
+      >
+        {text}
+      </span>
+      {clamped && !expanded && (
+        <button className="caption-see-more" onClick={() => setExpanded(true)}>
+          ...see more
+        </button>
+      )}
+    </span>
+  );
+}
+
 function PostDetailContent({ id }: { id: string }) {
   const { data: post, isLoading: postLoading } = usePost(id);
   const { data: commentsData, isLoading: commentsLoading } = useComments(id);
@@ -49,19 +76,18 @@ function PostDetailContent({ id }: { id: string }) {
           </div>
         </div>
         <div className="comment-section">
-          <div className="post-caption" style={{ margin: "8px 4px" }}>
-            <div className="profile">
-              <div className="profile-picture-wrapper">
-                <img
-                  className="profile-picture"
-                  src={generateAvatarUrl(post.author)}
-                  alt={`profile picture of ${post.author}`}
-                />
-              </div>
+          <div className="post-caption">
+            <div className="profile-picture-wrapper">
+              <img
+                className="profile-picture"
+                src={generateAvatarUrl(post.author)}
+                alt={`profile picture of ${post.author}`}
+              />
             </div>
-            <div>
+            <div style={{ textAlign: "left" }}>
               <span className="author">{post.author}</span>
-              <span>{post.caption}</span>
+              <CaptionText text={post.caption} />
+              <span className="date-posted">{timeAgo(post.createdAt)}</span>
             </div>
           </div>
           {commentsLoading ? (
@@ -73,19 +99,13 @@ function PostDetailContent({ id }: { id: string }) {
             </div>
           ) : (
             commentsData.items.map((comment) => (
-              <div
-                key={comment.id}
-                className="comment-item"
-                style={{ margin: "8px 4px" }}
-              >
-                <div className="profile">
-                  <div className="profile-picture-wrapper">
-                    <img
-                      className="profile-picture"
-                      src={generateAvatarUrl(comment.author)}
-                      alt={`profile picture of ${comment.author}`}
-                    />
-                  </div>
+              <div key={comment.id} className="comment-item">
+                <div className="profile-picture-wrapper">
+                  <img
+                    className="profile-picture"
+                    src={generateAvatarUrl(comment.author)}
+                    alt={`profile picture of ${comment.author}`}
+                  />
                 </div>
                 <div style={{ textAlign: "left" }}>
                   <div>
@@ -497,7 +517,7 @@ function FeedLayout() {
                 </div>
                 <div className="captions">
                   <span className="author">{post.author}</span>
-                  <span>{post.caption}</span>
+                  <CaptionText text={post.caption} />
                 </div>
               </div>
             ))
