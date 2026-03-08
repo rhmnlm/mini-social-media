@@ -564,6 +564,17 @@
   cursor: not-allowed;
 }
 
+.login-error {
+  font-size: 13px;
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.login-spinner {
+  width: 14px;
+  height: 14px;
+}
+
 /* ─── Mobile header / footer (hidden on desktop) ─── */
 
 .mobile-header {
@@ -1104,6 +1115,34 @@ body.modal {
 .comments-empty-sub {
   font-size: 13px;
   color: #aaa;
+  margin: 0;
+}
+
+/* ─── Feed error state ─── */
+
+.feed-column--centered {
+  justify-content: center;
+}
+
+.feed-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.feed-error-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.feed-error-sub {
+  font-size: 13px;
+  color: #999;
   margin: 0;
 }
 

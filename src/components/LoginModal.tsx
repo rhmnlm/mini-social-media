@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { postApi } from "../api/posts";
 
 interface Props {
   onLogin: (apiKey: string) => void;
@@ -7,14 +8,40 @@ interface Props {
 export default function LoginModal({ onLogin }: Props) {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
-  const canLogin = apiKeyInput.trim().length > 0 && usernameInput.trim().length >= 2;
+  const canSubmit = apiKeyInput.trim().length > 0 && usernameInput.trim().length >= 2 && !isValidating;
 
-  function handleLogin() {
-    if (!canLogin) return;
-    sessionStorage.setItem("api-key", apiKeyInput.trim());
-    sessionStorage.setItem("username", usernameInput.trim());
-    onLogin(apiKeyInput.trim());
+  async function handleLogin() {
+    if (!canSubmit) return;
+    const key = apiKeyInput.trim();
+    const username = usernameInput.trim();
+
+    setIsValidating(true);
+    setValidationError("");
+
+    // Temporarily set so the axios interceptor can attach it to the validation request
+    sessionStorage.setItem("api-key", key);
+
+    try {
+      await postApi.list({ limit: 1 });
+      sessionStorage.setItem("username", username);
+      onLogin(key);
+    } catch (err) {
+      sessionStorage.removeItem("api-key");
+      const status =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 401 || status === 403) {
+        setValidationError("Invalid API key. Please check and try again.");
+      } else {
+        setValidationError("Network error. Check your connection and try again.");
+      }
+    } finally {
+      setIsValidating(false);
+    }
   }
 
   return (
@@ -41,12 +68,13 @@ export default function LoginModal({ onLogin }: Props) {
               type="text"
               placeholder="Your API key"
               value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
+              onChange={(e) => { setApiKeyInput(e.target.value); setValidationError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
-          <button className="login-btn" onClick={handleLogin} disabled={!canLogin}>
-            Get started
+          {validationError && <p className="login-error">{validationError}</p>}
+          <button className="login-btn" onClick={handleLogin} disabled={!canSubmit}>
+            {isValidating ? <span className="spinner login-spinner" /> : "Get started"}
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { useEscKey } from "../hooks/useEscKey";
 import { generateAvatarUrl } from "../utility/avatarUtil";
 import { timeAgo } from "../utility/dateUtil";
 import { CommentIcon, HeartIcon, UploadImageIcon } from "./icons";
+import { IconAlertTriangle } from "@tabler/icons-react";
 import AppLogo from "./AppLogo";
 import CreatePostPanel from "./CreatePostPanel";
 import CaptionText from "./CaptionText";
@@ -42,9 +43,11 @@ export default function FeedLayout() {
   if (isError) return (
     <div className="app-layout">
       <aside className="sidebar"><AppLogo /></aside>
-      <main className="feed-column">
-        <div className="content-layout feed-error">
-          <p>Something went wrong. Check your API key and try again.</p>
+      <main className="feed-column feed-column--centered">
+        <div className="feed-error">
+          <IconAlertTriangle size={40} stroke={1.5} color="#ccc" />
+          <p className="feed-error-title">Something went wrong</p>
+          <p className="feed-error-sub">Check your API key and try again.</p>
         </div>
       </main>
     </div>
