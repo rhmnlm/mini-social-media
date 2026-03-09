@@ -147,7 +147,7 @@ export default function CreatePostPanel({ onClose }: { onClose?: () => void }) {
             className="create-post-file-input-hidden"
             onChange={handleFileChange}
           />
-          {error && <p className="upload-error">{error}</p>}
+          {error && <p className="upload-error" role="alert">{error}</p>}
         </div>
       ) : (
         <div className="create-post-with-preview">
@@ -188,7 +188,7 @@ export default function CreatePostPanel({ onClose }: { onClose?: () => void }) {
               </div>
               <span className="caption-char-count">{caption.length} / 2200</span>
             </div>
-            {error && <p className="upload-error">{error}</p>}
+            {error && <p className="upload-error" role="alert">{error}</p>}
             {isPending && uploadProgress !== null && (
               <div className="upload-progress-wrapper">
                 <div className="upload-progress-track">

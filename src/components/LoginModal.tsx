@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { postApi } from "../api/posts";
 
 interface Props {
@@ -10,6 +10,13 @@ export default function LoginModal({ onLogin }: Props) {
   const [usernameInput, setUsernameInput] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [showSlowMessage, setShowSlowMessage] = useState(false);
+
+  useEffect(() => {
+    if (!isValidating) { setShowSlowMessage(false); return; }
+    const timer = setTimeout(() => setShowSlowMessage(true), 5000);
+    return () => clearTimeout(timer);
+  }, [isValidating]);
 
   const canSubmit = apiKeyInput.trim().length > 0 && usernameInput.trim().length >= 2 && !isValidating;
 
@@ -73,6 +80,9 @@ export default function LoginModal({ onLogin }: Props) {
             />
           </div>
           {validationError && <p className="login-error">{validationError}</p>}
+          {showSlowMessage && !validationError && (
+            <p className="login-slow-message">This is taking longer than expected…</p>
+          )}
           <button className="login-btn" onClick={handleLogin} disabled={!canSubmit}>
             {isValidating ? <span className="spinner login-spinner" /> : "Get started"}
           </button>

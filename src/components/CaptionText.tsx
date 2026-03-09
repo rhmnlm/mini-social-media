@@ -1,5 +1,13 @@
 import { memo, useEffect, useRef, useState } from "react";
 
+function renderWithTags(text: string) {
+  return text.split(/(#\w+|@\w+)/g).map((part, i) =>
+    /^[#@]\w+$/.test(part)
+      ? <span key={i} className="caption-tag">{part}</span>
+      : part
+  );
+}
+
 function CaptionText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   const [clamped, setClamped] = useState(false);
@@ -16,7 +24,7 @@ function CaptionText({ text }: { text: string }) {
         ref={ref}
         className={`caption-text${expanded ? "" : " caption-text-clamped"}`}
       >
-        {text}
+        {renderWithTags(text)}
       </span>
       {clamped && !expanded && (
         <button className="caption-see-more" onClick={() => setExpanded(true)}>

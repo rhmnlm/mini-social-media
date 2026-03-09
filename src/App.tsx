@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { Route, Routes, useLocation } from "react-router-dom";
 import LoginModal from "./components/LoginModal";
@@ -9,6 +9,12 @@ import PostDetailModal from "./components/PostDetailModal";
 function App() {
   const [apiKey, setApiKey] = useState(sessionStorage.getItem("api-key") ?? "");
   const location = useLocation();
+
+  useEffect(() => {
+    const handleLogout = () => setApiKey("");
+    window.addEventListener("auth:logout", handleLogout);
+    return () => window.removeEventListener("auth:logout", handleLogout);
+  }, []);
   const backgroundLocation = location.state?.backgroundLocation;
 
   return (

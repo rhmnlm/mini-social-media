@@ -7,11 +7,17 @@ import CaptionText from "./CaptionText";
 import { IconMessageCircle } from "@tabler/icons-react";
 
 export default function PostDetailContent({ id }: { id: string }) {
-  const { data: post, isLoading: postLoading } = usePost(id);
+  const { data: post, isLoading: postLoading, isError: postError, error: postErr } = usePost(id);
   const { data: commentsData, isLoading: commentsLoading } = useComments(id);
 
   if (postLoading) return <div className="post-detail-loading"><span className="spinner" /></div>;
-  if (!post) return <div className="post-detail-error"><p>Post not found.</p></div>;
+  if (postError || !post) {
+    const status = (postErr as { response?: { status?: number } })?.response?.status;
+    const message = status === 404
+      ? "Post not found."
+      : "Something went wrong. Please try again.";
+    return <div className="post-detail-error"><p>{message}</p></div>;
+  }
 
   return (
     <div className="modal-body post-detail">

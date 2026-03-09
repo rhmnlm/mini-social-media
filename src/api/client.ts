@@ -18,3 +18,15 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     }
     return config;
 })
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            sessionStorage.removeItem("api-key");
+            sessionStorage.removeItem("username");
+            window.dispatchEvent(new Event("auth:logout"));
+        }
+        return Promise.reject(error);
+    }
+)
