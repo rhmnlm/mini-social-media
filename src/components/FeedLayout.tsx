@@ -186,7 +186,7 @@ export default function FeedLayout() {
           className="mobile-create-button"
           onClick={() => setShowMobileCreate(true)}
         >
-          + New Post
+          New Post
         </button>
       </footer>
 

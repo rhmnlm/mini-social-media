@@ -128,7 +128,7 @@ export default function CreatePostPanel({ onClose }: { onClose?: () => void }) {
   return (
     <div className="create-panel-content">
       <div className="create-panel-header">
-        <h3 className="create-panel-title">Share What's Happening</h3>
+        <h3 className="create-panel-title">New Post</h3>
       </div>
       {!previewUrl ? (
         <div className="upload-empty-state">

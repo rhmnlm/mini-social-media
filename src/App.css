@@ -10,6 +10,7 @@
   --color-text-muted: #888;      /* timestamps, subtitles, placeholders */
   --color-text-faint: #aaa;      /* char count, icon resting state */
   --color-hover-dark: #333;      /* dark button hover */
+  --color-link: #0095f6;         /* hashtags, @mentions */
 }
 
 #root {
@@ -52,7 +53,7 @@
   padding: 6px 4px;
   font-size: 18px;
   font-weight: 700;
-  color: #000;
+  color: var(--color-text);
   letter-spacing: -0.3px;
 }
 
@@ -289,7 +290,7 @@
   left: 0;
   width: 240px;
   background: #fff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   z-index: 100;
@@ -697,12 +698,25 @@
   }
 }
 
+/* ─── Modal animations ─── */
+
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalContentIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
 /* ─── The Modal (background) ─── */
 
 .modal {
   display: block;
   position: fixed;
-  z-index: 1;
+  z-index: 50;
+  animation: modalBackdropIn 0.15s ease-out;
   left: 0;
   top: 0;
   width: 100%;
@@ -724,6 +738,7 @@
   height: auto;
   border-radius: 16px;
   background-color: #fefefe;
+  animation: modalContentIn 0.18s ease-out;
 }
 
 .modal-content.create-post-modal {
@@ -881,7 +896,7 @@
 }
 
 .content {
-  border: 1px solid rgb(219, 223, 228);
+  border: 1px solid var(--color-border);
   width: 100%;
   display: flex;
   justify-content: center;
@@ -981,7 +996,7 @@
 }
 
 .caption-tag {
-  color: #0095f6;
+  color: var(--color-link);
   font-weight: 500;
 }
 
@@ -1030,7 +1045,7 @@
   display: flex;
   align-items: flex-start;
   padding: 12px 0 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
   padding-left: 8px;
 }
 

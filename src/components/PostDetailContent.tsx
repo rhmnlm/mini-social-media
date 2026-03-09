@@ -4,7 +4,7 @@ import { generateAvatarUrl } from "../utility/avatarUtil";
 import { timeAgo } from "../utility/dateUtil";
 import { HeartIcon } from "./icons";
 import CaptionText from "./CaptionText";
-import { IconMessageCircle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconMessageCircle } from "@tabler/icons-react";
 
 export default function PostDetailContent({ id }: { id: string }) {
   const { data: post, isLoading: postLoading, isError: postError, error: postErr } = usePost(id);
@@ -13,10 +13,16 @@ export default function PostDetailContent({ id }: { id: string }) {
   if (postLoading) return <div className="post-detail-loading"><span className="spinner" /></div>;
   if (postError || !post) {
     const status = (postErr as { response?: { status?: number } })?.response?.status;
-    const message = status === 404
-      ? "Post not found."
-      : "Something went wrong. Please try again.";
-    return <div className="post-detail-error"><p>{message}</p></div>;
+    const is404 = status === 404;
+    return (
+      <div className="post-detail-error">
+        <div className="feed-error">
+          <IconAlertTriangle size={40} stroke={1.5} color="#ccc" />
+          <p className="feed-error-title">{is404 ? "Post not found" : "Something went wrong"}</p>
+          <p className="feed-error-sub">{is404 ? "This post may have been deleted." : "Check your connection and try again."}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
