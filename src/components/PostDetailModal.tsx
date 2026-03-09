@@ -14,6 +14,13 @@ export default function PostDetailModal() {
   useEscKey(close);
 
   useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
