@@ -178,7 +178,7 @@ export default function FeedLayout() {
       </main>
 
       {/* Right panel - desktop only */}
-      <aside className="right-panel">{/* <CreatePostPanel /> */}</aside>
+      <aside className="right-panel" />
 
       {/* Mobile fixed footer */}
       <footer className="mobile-footer">

@@ -55,8 +55,9 @@ export default function LoginModal({ onLogin }: Props) {
     <div id="myModal" className="modal">
       <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="login-title">
         <div className="modal-body login-modal-body">
-          <p id="login-title" className="login-title">Welcome to a-poc</p>
-          <p className="login-subtitle">Enter your details to get started.</p>
+          <img src="/logo.svg" alt="a-poc logo" className="login-logo" />
+          <p id="login-title" className="login-title">Welcome back</p>
+          <p className="login-subtitle">Sign in to continue.</p>
           <div className="login-field">
             <label htmlFor="login-username">Username</label>
             <input
@@ -72,16 +73,16 @@ export default function LoginModal({ onLogin }: Props) {
             <label htmlFor="login-api-key">API Key</label>
             <input
               id="login-api-key"
-              type="text"
+              type="password"
               placeholder="Your API key"
               value={apiKeyInput}
               onChange={(e) => { setApiKeyInput(e.target.value); setValidationError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
-          {validationError && <p className="login-error">{validationError}</p>}
+          {validationError && <p className="login-error" role="alert">{validationError}</p>}
           {showSlowMessage && !validationError && (
-            <p className="login-slow-message">This is taking longer than expected…</p>
+            <p className="login-slow-message" role="status">This is taking longer than expected…</p>
           )}
           <button className="login-btn" onClick={handleLogin} disabled={!canSubmit}>
             {isValidating ? <span className="spinner login-spinner" /> : "Get started"}

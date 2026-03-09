@@ -6,6 +6,10 @@
   --color-accent-dark: #c0303a;
   --color-text: #111;
   --color-bg-dark: #111;
+  --color-text-secondary: #555;  /* empty states, section labels */
+  --color-text-muted: #888;      /* timestamps, subtitles, placeholders */
+  --color-text-faint: #aaa;      /* char count, icon resting state */
+  --color-hover-dark: #333;      /* dark button hover */
 }
 
 #root {
@@ -102,27 +106,7 @@
   margin: 0;
 }
 
-.create-panel-close {
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: #666;
-  line-height: 1;
-  padding: 0 4px;
-}
 
-.create-panel-close:hover {
-  color: #000;
-}
-
-.create-post-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-  /* min-height: 60dvh; */
-}
 
 .create-post-file-input-hidden {
   position: absolute;
@@ -179,7 +163,7 @@
 }
 
 .select-file-btn:hover {
-  background-color: #333;
+  background-color: var(--color-hover-dark);
 }
 
 .upload-error {
@@ -282,7 +266,7 @@
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: #aaa;
+  color: var(--color-text-faint);
   display: flex;
   align-items: center;
   border-radius: 4px;
@@ -290,7 +274,7 @@
 }
 
 .emoji-trigger-btn:hover {
-  color: #555;
+  color: var(--color-text-secondary);
   border-color: transparent;
 }
 
@@ -380,7 +364,7 @@
 
 .caption-char-count {
   font-size: 12px;
-  color: #aaa;
+  color: var(--color-text-faint);
 }
 
 .post-submit-btn {
@@ -433,7 +417,7 @@
 
 .upload-progress-label {
   font-size: 11px;
-  color: #888;
+  color: var(--color-text-muted);
   text-align: right;
 }
 
@@ -475,7 +459,7 @@
   background-color: #000;
   color: white;
   border: none;
-  border-radius: 16px;
+  border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -485,7 +469,7 @@
 }
 
 .create-post-button:hover {
-  background-color: #333;
+  background-color: var(--color-hover-dark);
 }
 
 .create-post-button span {
@@ -497,10 +481,19 @@
 .login-modal-body {
   padding: 32px 28px !important;
   gap: 12px;
+  align-items: center;
+  text-align: center;
+}
+
+.login-logo {
+  width: 52px;
+  height: 52px;
+  display: block;
+  margin: 0 auto 2px;
 }
 
 .login-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text);
   margin: 0 0 2px;
@@ -508,7 +501,7 @@
 
 .login-subtitle {
   font-size: 14px;
-  color: #888;
+  color: var(--color-text-muted);
   margin: 0 0 8px;
 }
 
@@ -516,12 +509,14 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  text-align: left;
+  width: 100%;
 }
 
 .login-field label {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-hover-dark);
 }
 
 .login-field input {
@@ -537,7 +532,7 @@
 
 .login-field input:focus {
   outline: none;
-  border-color: #888;
+  border-color: var(--color-text-muted);
 }
 
 .login-btn {
@@ -555,7 +550,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  background-color: #333;
+  background-color: var(--color-hover-dark);
   border-color: transparent;
 }
 
@@ -572,7 +567,7 @@
 
 .login-slow-message {
   font-size: 12px;
-  color: #888;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -663,7 +658,7 @@
     background-color: #000;
     color: white;
     border: none;
-    border-radius: 24px;
+    border-radius: 20px;
     padding: 11px 36px;
     font-size: 15px;
     font-weight: 600;
@@ -673,7 +668,7 @@
   }
 
   .mobile-create-button:hover {
-    background-color: #333;
+    background-color: var(--color-hover-dark);
   }
 
   .create-post-modal {
@@ -716,10 +711,6 @@
   background-color: rgba(0,0,0,0.4);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  /* -webkit-animation-name: fadeIn; */
-  /* -webkit-animation-duration: 0.4s; */
-  /* animation-name: fadeIn; */
-  /* animation-duration: 0.4s; */
 }
 
 /* Modal Content */
@@ -733,10 +724,6 @@
   height: auto;
   border-radius: 16px;
   background-color: #fefefe;
-  /* -webkit-animation-name: slideIn; */
-  /* -webkit-animation-duration: 0.4s; */
-  /* animation-name: slideIn; */
-  /* animation-duration: 0.4s; */
 }
 
 .modal-content.create-post-modal {
@@ -751,20 +738,6 @@
 }
 
 
-/* The Close Button */
-.close {
-  color: white;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
 
 .modal-body {
   padding: 2px 16px;
@@ -781,8 +754,18 @@
 
 #postModal .modal-content {
   width: auto;
+  min-width: min(90vw, 760px);
   height: 80vh;
   max-width: 90vw;
+}
+
+.post-detail-loading,
+.post-detail-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .post-detail .post-detail-content {
@@ -829,33 +812,6 @@
   margin-right: 16px;
 }
 
-@media(min-width: 480px){
-  #welcome-modal {
-    width: 50%;
-    height: 20dvh;
-  }
-}
-
-/* Add Animation */
-@-webkit-keyframes slideIn {
-  from {bottom: -300px; opacity: 0}
-  to {bottom: 0; opacity: 1}
-}
-
-@keyframes slideIn {
-  from {bottom: -300px; opacity: 0}
-  to {bottom: 0; opacity: 1}
-}
-
-@-webkit-keyframes fadeIn {
-  from {opacity: 0}
-  to {opacity: 1}
-}
-
-@keyframes fadeIn {
-  from {opacity: 0}
-  to {opacity: 1}
-}
 
 /* ─── Feed cards ─── */
 
@@ -878,12 +834,12 @@
   width: 20px;
   height: 20px;
   border-color: rgba(0, 0, 0, 0.15);
-  border-top-color: #555;
+  border-top-color: var(--color-text-secondary);
 }
 
 .feed-end-text {
   font-size: 13px;
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .card {
@@ -921,7 +877,7 @@
 
 .date-posted {
   font-weight: 400;
-  color: grey;
+  color: var(--color-text-muted);
 }
 
 .content {
@@ -931,7 +887,7 @@
   justify-content: center;
   align-items: center;
   transition: 0.3s;
-  background-color: beige;
+  background-color: var(--color-bg-dark);
   overflow: hidden;
   border-radius: 8px;
 }
@@ -962,6 +918,17 @@
 .comment {
   display: flex;
   align-items: center;
+  border-radius: 6px;
+  transition: opacity 0.15s;
+}
+
+.comment:hover {
+  opacity: 0.6;
+}
+
+.comment:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
 }
 
 
@@ -975,9 +942,6 @@
   font-weight: 600;
 }
 
-.comments-count {
-  font-weight: 600;
-}
 
 .captions {
   padding-left: 12px;
@@ -1006,14 +970,14 @@
   padding: 0;
   font-size: inherit;
   font-family: inherit;
-  color: #888;
+  color: var(--color-text-muted);
   cursor: pointer;
   display: block;
   margin-top: 2px;
 }
 
 .caption-see-more:hover {
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .caption-tag {
@@ -1036,9 +1000,6 @@
   justify-content: flex-start;
 }
 
-body.modal {
-  overflow-y: hidden;
-}
 
 .back-button {
   background: none;
@@ -1103,7 +1064,7 @@ body.modal {
   width: 22px;
   height: 22px;
   border-color: rgba(0, 0, 0, 0.12);
-  border-top-color: #555;
+  border-top-color: var(--color-text-secondary);
 }
 
 .comments-empty-state {
@@ -1113,21 +1074,16 @@ body.modal {
   justify-content: center;
   gap: 6px;
   padding: 32px 16px;
-  color: #aaa;
+  color: var(--color-text-faint);
 }
 
 .comments-empty-title {
   font-size: 14px;
   font-weight: 600;
-  color: #555;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
-.comments-empty-sub {
-  font-size: 13px;
-  color: #aaa;
-  margin: 0;
-}
 
 /* ─── Feed error state ─── */
 
@@ -1147,13 +1103,13 @@ body.modal {
 .feed-error-title {
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-hover-dark);
   margin: 0;
 }
 
 .feed-error-sub {
   font-size: 13px;
-  color: #999;
+  color: var(--color-text-muted);
   margin: 0;
 }
 

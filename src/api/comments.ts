@@ -7,7 +7,7 @@ export const commentApi = {
      * @param id id of post
      */
     get: async (id: string): Promise<CommentsResponse> => {
-        const response = await apiClient.get(`/api/comments/${id}`);
+        const response = await apiClient.get(`api/comments/${id}`);
         return response.data;
     }
 }

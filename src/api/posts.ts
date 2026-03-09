@@ -31,7 +31,7 @@ export const postApi = {
             headers: { "Content-Type": undefined },
             onUploadProgress: payload.onUploadProgress
                 ? (e) => {
-                      const percent = Math.round((e.loaded * 100) / (e.total ?? e.loaded));
+                      const percent = Math.round((e.loaded * 100) / (e.total || e.loaded));
                       payload.onUploadProgress!(percent);
                   }
                 : undefined,
@@ -40,7 +40,7 @@ export const postApi = {
     },
 
     get: async(id:string): Promise<Post> => {
-        const response = await apiClient.get(`/api/posts/${id}`);
+        const response = await apiClient.get(`api/posts/${id}`);
         return response.data;
     }
 }
